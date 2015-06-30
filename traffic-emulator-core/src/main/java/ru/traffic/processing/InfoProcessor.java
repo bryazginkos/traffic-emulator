@@ -9,22 +9,22 @@ import ru.traffic.util.RoadArray;
  */
 public class InfoProcessor {
 
-    public static boolean isFreeFrontSpace(RoadArray state, Position position, int interval) throws OutOfViewException {
+    public static int freeFrontSpace(RoadArray state, Position position, int Maxinterval) throws OutOfViewException {
         //todo check params
         int viewInterval = 0;
         int distance = position.getDistance();
         int lane = position.getLane();
 
-        while (viewInterval < interval) {
+        while (viewInterval <= Maxinterval) {
             viewInterval++;
             int viewDistance = distance + viewInterval;
             if (viewDistance > state.getLength()) {
                 throw new OutOfViewException();
             }
             if (state.get(viewDistance, lane) != null) {
-                return false;
+                return viewInterval - 1;
             }
         }
-        return true;
+        return Maxinterval;
     }
 }
