@@ -3,22 +3,31 @@ package ru.traffic.util;
 import ru.traffic.model.RoadPointInfo;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 
 /**
  * Created by Константин on 30.06.2015.
  */
-public class RoadArray {
+public class RoadArray implements Cloneable {
 
     private final int length;
     private final int lanesNumber;
 
     private final RoadPointInfo[][] array;
 
-    @SuppressWarnings("unchecked")
     public RoadArray(int length, int lanesNumber) {
         this.length = length;
         this.lanesNumber = lanesNumber;
-        array = (RoadPointInfo[][]) Array.newInstance(RoadPointInfo.class, length, lanesNumber);
+        array = new RoadPointInfo[length][lanesNumber];
+    }
+
+    public RoadArray(RoadArray roadArray) {
+        this.length = roadArray.getLength();
+        this.lanesNumber = roadArray.getLanesNumber();
+        array = new RoadPointInfo[length][lanesNumber];
+        for (int i = 0; i < length; i ++) {
+            array[i] = Arrays.copyOf(roadArray.array[i], lanesNumber);
+        }
     }
 
     //todo check params
@@ -38,4 +47,6 @@ public class RoadArray {
     public int getLanesNumber() {
         return lanesNumber;
     }
+
+
 }
