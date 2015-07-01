@@ -10,7 +10,7 @@
         function setConnected(connected) {
             document.getElementById('connect').disabled = connected;
             document.getElementById('disconnect').disabled = !connected;
-            document.getElementById('conversationDiv').style.visibility = connected ? 'visible' : 'hidden';
+            document.getElementById('workDiv').style.visibility = connected ? 'visible' : 'hidden';
         }
 
         function connect() {
@@ -20,7 +20,7 @@
                 setConnected(true);
                 console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/to', function(road){
-                    showGreeting(JSON.parse(road.body).points, JSON.parse(road.body).lanes, JSON.parse(road.body).length);
+                    showRoad(JSON.parse(road.body).points, JSON.parse(road.body).lanes, JSON.parse(road.body).length);
                 });
             });
         }
@@ -33,7 +33,7 @@
             console.log("Disconnected");
         }
 
-        function sendName() {
+        function sendRoadParams() {
             var len = document.getElementById('roadLength').value;
             var lanes = document.getElementById('roadLanes').value;
             var canvas = document.getElementById("myCanvas");
@@ -42,7 +42,7 @@
             stompClient.send("/app/websocketservice", {}, JSON.stringify({ 'length': len, 'lanes':lanes }));
         }
 
-        function showGreeting(points, lanes, len) {
+        function showRoad(points, lanes, len) {
             var canvas = document.getElementById("myCanvas");
             var ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -75,12 +75,12 @@
         <button id="connect" onclick="connect();">Connect</button>
         <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
     </div>
-    <div id="conversationDiv">
-        <label>What is the length of the road?</label><input type="text" id="roadLength" /> <br/>
-        <label>How many lanes does the road have?</label><input type="text" id="roadLanes" /> <br/>
-        <button id="sendName" onclick="sendName();">Send</button>
+    <div id="workDiv">
+        <label>Road's length: </label><input type="text" id="roadLength" /> <br/>
+        <label>Lanes Number:</label><input type="text" id="roadLanes" /> <br/>
+        <button id="sendName" onclick="sendRoadParams();">Create Road</button> <br/>
 
-        <canvas id="myCanvas" width="500" height="300">
+        <canvas id="myCanvas" width="1" height="1">
             <!-- Insert fallback content here -->
         </canvas>
     </div>
