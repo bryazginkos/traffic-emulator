@@ -49,6 +49,7 @@ public class CarActor extends UntypedActor {
         } catch (OutOfViewException e) {
             DeleteRoadPointMessage deleteRoadPointMessage = new DeleteRoadPointMessage(position);
             decisionActor.tell(deleteRoadPointMessage, getSelf());
+            getContext().stop(getSelf());
         }
 
     }
