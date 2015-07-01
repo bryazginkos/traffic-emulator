@@ -1,0 +1,89 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hello WebSocket</title>
+    <script src="sockjs-0.3.4.js"></script>
+    <script src="stomp.js"></script>
+    <script type="text/javascript">
+        var stompClient = null;
+
+        function setConnected(connected) {
+            document.getElementById('connect').disabled = connected;
+            document.getElementById('disconnect').disabled = !connected;
+            document.getElementById('workDiv').style.visibility = connected ? 'visible' : 'hidden';
+        }
+
+        function connect() {
+            var socket = new SockJS('/websocketservice');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function(frame) {
+                setConnected(true);
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/to', function(road){
+                    showRoad(JSON.parse(road.body).points, JSON.parse(road.body).lanes, JSON.parse(road.body).length);
+                });
+            });
+        }
+
+        function disconnect() {
+            if (stompClient != null) {
+                stompClient.disconnect();
+            }
+            setConnected(false);
+            console.log("Disconnected");
+        }
+
+        function sendRoadParams() {
+            var len = document.getElementById('roadLength').value;
+            var lanes = document.getElementById('roadLanes').value;
+            var canvas = document.getElementById("myCanvas");
+            canvas.setAttribute("width", len*10);
+            canvas.setAttribute("height", lanes*10);
+            stompClient.send("/app/websocketservice", {}, JSON.stringify({ 'length': len, 'lanes':lanes }));
+        }
+
+        function showRoad(points, lanes, len) {
+            var canvas = document.getElementById("myCanvas");
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (i = 0; i < len; i++) {
+                for (j = 0; j < lanes; j ++) {
+                    viewType = points[i][j];
+                    x = i*10 + 5;
+                    y = j*10 + 5;
+                    showPoint(ctx, x, y, viewType);
+                }
+            }
+        }
+
+        function showPoint(ctx, x, y, viewType) {
+            if (viewType == 0) {
+                ctx.fillStyle = "rgb(0, 0, 0)";
+            }
+            if (viewType == 1) {
+                ctx.fillStyle = "rgb(255, 0, 0)";
+            }
+            ctx.fillRect(x - 4, y -4, 8, 8);
+        }
+    </script>
+</head>
+<body onload="disconnect()">
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+<div>
+    <div>
+        <button id="connect" onclick="connect();">Connect</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
+    </div>
+    <div id="workDiv">
+        <label>Road's length: </label><input type="text" id="roadLength" /> <br/>
+        <label>Lanes Number:</label><input type="text" id="roadLanes" /> <br/>
+        <button id="sendName" onclick="sendRoadParams();">Create Road</button> <br/>
+
+        <canvas id="myCanvas" width="1" height="1">
+            <!-- Insert fallback content here -->
+        </canvas>
+    </div>
+</div>
+</body>
+</html>

@@ -8,8 +8,10 @@ import ru.traffic.messages.manage.AddRoadPointMessage;
 import ru.traffic.messages.manage.InitMessage;
 import ru.traffic.model.Position;
 import ru.traffic.model.RoadPointInfo;
+import ru.traffic.util.RoadArray;
 
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 /**
  * Created by Константин on 01.07.2015.
@@ -20,6 +22,10 @@ public class ManagerActor extends UntypedActor {
     private ActorRef roadActor;
     private ActorRef viewActor;
     private HashSet<ActorRef> roadPointActors;
+
+    public ManagerActor(Consumer<RoadArray> consumer) {
+        viewActor = getContext().actorOf(Props.create(ViewActor.class, consumer), "view");
+    }
 
     @Override
     public void onReceive(Object o) throws Exception {
@@ -33,7 +39,6 @@ public class ManagerActor extends UntypedActor {
     }
 
     private void init(InitMessage initMessage) {
-        viewActor = getContext().actorOf(Props.create(ViewActor.class), "view");
         roadActor = getContext().actorOf(Props.create(RoadActor.class, viewActor), "road");
         decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor), "decision");
         roadPointActors = new HashSet<>();

@@ -1,2 +1,3 @@
 rootProject.name = 'traffic-emulator'
 include 'traffic-emulator-core'
+include 'traffic-emulator-view'
