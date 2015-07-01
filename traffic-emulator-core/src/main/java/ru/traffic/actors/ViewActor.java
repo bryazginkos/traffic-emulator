@@ -4,10 +4,19 @@ import akka.actor.UntypedActor;
 import ru.traffic.messages.NextTimeMessage;
 import ru.traffic.util.RoadArray;
 
+import java.util.function.Consumer;
+
 /**
  * Created by Константин on 01.07.2015.
  */
 public class ViewActor extends UntypedActor {
+
+    private Consumer<RoadArray> consumer;
+
+    public ViewActor(Consumer<RoadArray> consumer) {
+        this.consumer = consumer;
+    }
+
     @Override
     public void onReceive(Object o) throws Exception {
         if (o instanceof NextTimeMessage) {
@@ -18,14 +27,6 @@ public class ViewActor extends UntypedActor {
     }
 
     private void show(NextTimeMessage nextTimeMessage) {
-        RoadArray state = nextTimeMessage.getState();
-        int lanes = state.getLanesNumber();
-        int length = state.getLength();
-        for (int i = 1; i <= lanes; i++) {
-            for (int j=1; j<=length; j++) {
-                System.out.print(state.get(j, i) != null ? "o" : "-");
-            }
-            System.out.println();
-        }
+        consumer.accept(nextTimeMessage.getState());
     }
 }
