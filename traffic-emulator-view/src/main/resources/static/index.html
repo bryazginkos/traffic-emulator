@@ -39,7 +39,7 @@
             var canvas = document.getElementById("myCanvas");
             canvas.setAttribute("width", len*10);
             canvas.setAttribute("height", lanes*10);
-            stompClient.send("/app/websocketservice", {}, JSON.stringify({ 'length': len, 'lanes':lanes }));
+            stompClient.send("/app/createroad", {}, JSON.stringify({ 'length': len, 'lanes':lanes }));
         }
 
         function showRoad(points, lanes, len) {

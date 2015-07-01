@@ -3,6 +3,7 @@ package ru.traffic.actors;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import ru.traffic.car.Car;
 import ru.traffic.messages.manage.AddRoadPointClientMessage;
 import ru.traffic.messages.manage.AddRoadPointMessage;
 import ru.traffic.messages.manage.InitMessage;
@@ -47,10 +48,10 @@ public class ManagerActor extends UntypedActor {
 
     private void addRoadPoint(AddRoadPointClientMessage addRoadPointClientMessage) {
         Position position = addRoadPointClientMessage.getPosition();
-        int wishSpeed = addRoadPointClientMessage.getWishSpeed();
+        Car car = addRoadPointClientMessage.getCar();
         //todo generate name?
-        ActorRef roadPoint = getContext().actorOf(Props.create(CarActor.class, decisionActor, wishSpeed, position));
-        RoadPointInfo roadPointInfo = new RoadPointInfo(wishSpeed, roadPoint);
+        ActorRef roadPoint = getContext().actorOf(Props.create(CarActor.class, decisionActor, car, position));
+        RoadPointInfo roadPointInfo = new RoadPointInfo(car.wishSpeed(), roadPoint);
         AddRoadPointMessage addRoadPointMessage = new AddRoadPointMessage(position.getDistance(), position.getLane(), roadPointInfo);
         roadPointActors.add(roadPoint);
         decisionActor.tell(addRoadPointMessage, roadPoint);

@@ -2,6 +2,7 @@ package ru.traffic.actors;
 
 import akka.actor.ActorRef;
 import akka.actor.UntypedActor;
+import ru.traffic.car.Car;
 import ru.traffic.exception.OutOfViewException;
 import ru.traffic.messages.NextTimeMessage;
 import ru.traffic.messages.manage.DeleteRoadPointMessage;
@@ -16,15 +17,15 @@ import ru.traffic.util.RoadArray;
  */
 public class CarActor extends UntypedActor {
 
-    private ActorRef decisionActor;
+    private final ActorRef decisionActor;
 
-    int wishSpeed;
+    private final Car car;
 
     private Position position;
 
-    public CarActor(ActorRef decisionActor, int wishSpeed, Position position) {
+    public CarActor(ActorRef decisionActor, Car car, Position position) {
         this.decisionActor = decisionActor;
-        this.wishSpeed = wishSpeed;
+        this.car = car;
         this.position = position;
     }
 
@@ -40,8 +41,8 @@ public class CarActor extends UntypedActor {
     private void nextTime(NextTimeMessage nextTimeMessage) {
         RoadArray state = nextTimeMessage.getState();
         try {
-            int freeSpace = InfoProcessor.freeFrontSpace(state, position, wishSpeed);
-            //todo logic must be out of class
+            int freeSpace = InfoProcessor.freeFrontSpace(state, position, car.wishSpeed());
+            //todo use car class to get behaviour
             Position futurePosition = new Position(position.getDistance() + freeSpace, position.getLane());
             Move move = new Move(position, futurePosition);
             position = futurePosition;

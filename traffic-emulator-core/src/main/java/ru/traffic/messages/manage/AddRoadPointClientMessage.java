@@ -1,5 +1,6 @@
 package ru.traffic.messages.manage;
 
+import ru.traffic.car.Car;
 import ru.traffic.model.Position;
 
 /**
@@ -7,18 +8,18 @@ import ru.traffic.model.Position;
  */
 public class AddRoadPointClientMessage {
     private final Position position;
-    private final int wishSpeed;
+    private final Car car;
 
-    public AddRoadPointClientMessage(Position position, int wishSpeed) {
+    public AddRoadPointClientMessage(Position position, Car car) {
         this.position = position;
-        this.wishSpeed = wishSpeed;
+        this.car = car;
     }
 
     public Position getPosition() {
         return position;
     }
 
-    public int getWishSpeed() {
-        return wishSpeed;
+    public Car getCar() {
+        return car;
     }
 }

@@ -4,6 +4,9 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 import akka.actor.Props;
 import ru.traffic.actors.ManagerActor;
+import ru.traffic.car.CarImpl;
+import ru.traffic.car.SlowFrontAction;
+import ru.traffic.car.StopFrontAction;
 import ru.traffic.messages.manage.AddRoadPointClientMessage;
 import ru.traffic.messages.manage.InitMessage;
 import ru.traffic.model.Position;
@@ -20,7 +23,7 @@ public class Main {
         manager.tell(initMessage, ActorRef.noSender());
 
         Position initPosition = new Position(1,1);
-        AddRoadPointClientMessage clientMessage = new AddRoadPointClientMessage(initPosition, 1);
+        AddRoadPointClientMessage clientMessage = new AddRoadPointClientMessage(initPosition, new CarImpl(0,5, SlowFrontAction.SLOW, StopFrontAction.STOP));
 
         manager.tell(clientMessage, ActorRef.noSender());
     }
