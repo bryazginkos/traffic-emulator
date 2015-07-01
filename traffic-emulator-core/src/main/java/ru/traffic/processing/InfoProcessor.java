@@ -15,7 +15,7 @@ public class InfoProcessor {
         int distance = position.getDistance();
         int lane = position.getLane();
 
-        while (viewInterval <= Maxinterval) {
+        while (viewInterval < Maxinterval) {
             viewInterval++;
             int viewDistance = distance + viewInterval;
             if (viewDistance > state.getLength()) {
