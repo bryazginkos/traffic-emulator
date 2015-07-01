@@ -42,6 +42,12 @@
             stompClient.send("/app/createroad", {}, JSON.stringify({ 'length': len, 'lanes':lanes }));
         }
 
+        function sendAddRoadPoint(distance, lane, wishSpeed, slowFrontAction, stopFrontAction, politeness) {
+            stompClient.send("/app/createpoint", {}, JSON.stringify({ 'distance': distance,
+                'lane': lane, 'wishSpeed': wishSpeed, 'slowFrontAction': slowFrontAction,
+            'stopFrontAction': stopFrontAction, 'politeness': politeness}));
+        }
+
         function showRoad(points, lanes, len) {
             var canvas = document.getElementById("myCanvas");
             var ctx = canvas.getContext("2d");
