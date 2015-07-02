@@ -30,7 +30,7 @@ public class MoveProcessor {
         RoadPointInfo roadPointInfo = state.get(from.getDistance(), from.getLane());
         if (state.get(to.getDistance(), to.getLane()) != null) {
             //todo create advanced check for accidents (trajectory's intersections)
-            throw new AccidentException();
+            throw new AccidentException("Accident at " + new Position(to.getDistance(), to.getLane()).toString());
         }
         state.put(to.getDistance(), to.getLane(), roadPointInfo);
         state.put(from.getDistance(), from.getLane(), null);
