@@ -6,7 +6,7 @@ package ru.traffic.view.json;
 public class RoadPoint {
     private int distance;
     private int lane;
-    private int wishspeed;
+    private int wishSpeed;
     private String slowFrontAction;
     private String stopFrontAction;
     private double politeness;
@@ -27,12 +27,12 @@ public class RoadPoint {
         this.lane = lane;
     }
 
-    public int getWishspeed() {
-        return wishspeed;
+    public int getWishSpeed() {
+        return wishSpeed;
     }
 
-    public void setWishspeed(int wishspeed) {
-        this.wishspeed = wishspeed;
+    public void setWishSpeed(int wishSpeed) {
+        this.wishSpeed = wishSpeed;
     }
 
     public String getSlowFrontAction() {

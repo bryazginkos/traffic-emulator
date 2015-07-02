@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <title>Hello WebSocket</title>
     <script src="sockjs-0.3.4.js"></script>
@@ -7,6 +7,12 @@
     <script type="text/javascript">
         var stompClient = null;
         var generatorOn=false;
+        var lanesNumber=0;
+
+        function switchGenerator(state) {
+            generatorOn = state;
+            generatePoints();
+        }
 
         function setConnected(connected) {
             document.getElementById('connect').disabled = connected;
@@ -23,6 +29,7 @@
                 console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/to', function(road){
                     showRoad(JSON.parse(road.body).points, JSON.parse(road.body).lanes, JSON.parse(road.body).length);
+                    generatePoints();
                 });
             });
         }
@@ -38,6 +45,7 @@
         function sendRoadParams() {
             var len = document.getElementById('roadLength').value;
             var lanes = document.getElementById('roadLanes').value;
+            lanesNumber = lanes;
             var canvas = document.getElementById("myCanvas");
             canvas.setAttribute("width", len*10);
             canvas.setAttribute("height", lanes*10);
@@ -62,6 +70,31 @@
                 document.getElementById('lanesCheckBoxes').appendChild(label);
                 document.getElementById('lanesCheckBoxes').appendChild(document.createElement("br"));
             }
+        }
+
+        function generatePoints() {
+            if (generatorOn == true) {
+                for (i=1; i<= lanesNumber; i++) {
+                    var laneActive = document.getElementById("lane" + i).checked;
+                    var probability = document.getElementById('probabilityField').value;
+                    if (Math.random() < probability/100 && laneActive) {
+                        var politeness = document.getElementById('politenessField').value;
+                        var frontStop = getRadioValue(document.getElementsByName('frontStopStrategy'));
+                        var frontSlow = getRadioValue(document.getElementsByName('frontSlowStrategy'));
+                        var wishSpeed = getRadioValue(document.getElementsByName('wishSpeedRadio'));
+                        sendAddRoadPoint(1, i, wishSpeed, frontSlow, frontStop, politeness/100);
+                    }
+                }
+            }
+        }
+
+        function getRadioValue(radioElement) {
+            for (i=0; i<radioElement.length; i++) {
+                if (radioElement[i].checked) {
+                    return radioElement[i].value;
+                }
+            }
+            return null;
         }
 
         function sendAddRoadPoint(distance, lane, wishSpeed, slowFrontAction, stopFrontAction, politeness) {
@@ -135,12 +168,12 @@
             <input type="radio" name="frontStopStrategy" value="stop" checked/> Stop <br/>
             <input type="radio" name="frontStopStrategy" value="side"/> Side <br/>
             <br/>
-            Politeness: <input type="text" name="politenessField"/> <br/>
+            Politeness: <input type="text" id="politenessField"/> <br/>
             <br/>
-            Probability <input type="text" name="probabilityField"/> <br/>
+            Probability <input type="text" id="probabilityField"/> <br/>
             <br/>
-            <input type="button" name="generatorOnBtn" value="Turn on"/> &nbsp;
-            <input type="button" name="generatorOffBtn" value="Turn off"/><br/>
+            <input type="button" name="generatorOnBtn" onclick="switchGenerator(true)" value="Turn on"/> &nbsp;
+            <input type="button" name="generatorOffBtn" onclick="switchGenerator(false)" value="Turn off"/><br/>
             </form>
         </div>
     </div>
