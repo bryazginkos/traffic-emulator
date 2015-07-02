@@ -74,7 +74,7 @@
 
         function generatePoints() {
             if (generatorOn == true) {
-                for (i=1; i<= lanesNumber; i++) {
+                for (var i=1; i<= lanesNumber; i++) {
                     var laneActive = document.getElementById("lane" + i).checked;
                     var probability = document.getElementById('probabilityField').value;
                     if (Math.random() < probability/100 && laneActive) {
@@ -156,7 +156,7 @@
             <br/>
 
             WishSpeed: <br/>
-            <input type="radio" name="wishSpeedRadio" value="1" checked/> 1 <br/>
+            <input type="radio" name="wishSpeedRadio" value="1" checked="checked"/> 1 <br/>
             <input type="radio" name="wishSpeedRadio" value="2"/> 2 <br/>
             <input type="radio" name="wishSpeedRadio" value="3"/> 3 <br/>
             <br/>
