@@ -39,4 +39,12 @@ public class Position {
         result = 31 * result + lane;
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Position{" +
+                "distance=" + distance +
+                ", lane=" + lane +
+                '}';
+    }
 }

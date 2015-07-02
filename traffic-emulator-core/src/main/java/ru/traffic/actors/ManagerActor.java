@@ -3,6 +3,8 @@ package ru.traffic.actors;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import ru.traffic.car.Car;
 import ru.traffic.messages.manage.AddRoadPointClientMessage;
 import ru.traffic.messages.manage.AddRoadPointMessage;
@@ -18,6 +20,8 @@ import java.util.function.Consumer;
  * Created by Константин on 01.07.2015.
  */
 public class ManagerActor extends UntypedActor {
+
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
     private ActorRef decisionActor;
     private ActorRef roadActor;
@@ -40,6 +44,7 @@ public class ManagerActor extends UntypedActor {
     }
 
     private void init(InitMessage initMessage) {
+        log.info("Create actors for new road: lanes=" + initMessage.getLanes() + " length=" + initMessage.getLength());
         roadActor = getContext().actorOf(Props.create(RoadActor.class, viewActor), "road");
         decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor), "decision");
         roadPointActors = new HashSet<>();
@@ -47,6 +52,7 @@ public class ManagerActor extends UntypedActor {
     }
 
     private void addRoadPoint(AddRoadPointClientMessage addRoadPointClientMessage) {
+        log.info("Create roadPoint: position=" + addRoadPointClientMessage.getPosition() + " car=" +  addRoadPointClientMessage.getCar());
         Position position = addRoadPointClientMessage.getPosition();
         Car car = addRoadPointClientMessage.getCar();
         //todo generate name?

@@ -40,4 +40,14 @@ public class CarImpl implements Car {
     public int wishSpeed() {
         return wishSpeed;
     }
+
+    @Override
+    public String toString() {
+        return "CarImpl{" +
+                "politeness=" + politeness +
+                ", wishSpeed=" + wishSpeed +
+                ", slowFrontAction=" + slowFrontAction +
+                ", stopFrontAction=" + stopFrontAction +
+                '}';
+    }
 }

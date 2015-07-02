@@ -1,6 +1,8 @@
 package ru.traffic.actors;
 
 import akka.actor.UntypedActor;
+import akka.event.Logging;
+import akka.event.LoggingAdapter;
 import ru.traffic.messages.NextTimeMessage;
 import ru.traffic.util.RoadArray;
 
@@ -11,6 +13,8 @@ import java.util.function.Consumer;
  */
 public class ViewActor extends UntypedActor {
 
+    private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
+
     private Consumer<RoadArray> consumer;
 
     public ViewActor(Consumer<RoadArray> consumer) {
@@ -20,6 +24,7 @@ public class ViewActor extends UntypedActor {
     @Override
     public void onReceive(Object o) throws Exception {
         if (o instanceof NextTimeMessage) {
+            log.info("publish road");
             show((NextTimeMessage)o);
         } else {
             unhandled(o);

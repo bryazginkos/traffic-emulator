@@ -27,4 +27,12 @@ public class Move {
     public void setTo(Position to) {
         this.to = to;
     }
+
+    @Override
+    public String toString() {
+        return "Move{" +
+                "from=" + from +
+                ", to=" + to +
+                '}';
+    }
 }
