@@ -5,10 +5,10 @@ import akka.actor.UntypedActor;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import ru.traffic.exception.AccidentException;
-import ru.traffic.exception.OccupiedPlaceException;
 import ru.traffic.messages.NextTimeMessage;
 import ru.traffic.messages.manage.AddRoadPointMessage;
 import ru.traffic.messages.manage.DeleteRoadPointMessage;
+import ru.traffic.messages.manage.ErrorAddRoadPointMessage;
 import ru.traffic.messages.manage.InitMessage;
 import ru.traffic.messages.move.MovesMessage;
 import ru.traffic.model.RoadPointInfo;
@@ -51,14 +51,16 @@ public class RoadActor extends UntypedActor {
         roadArray = new RoadArray(length, lanes);
     }
 
-    private void addRoadPoint(AddRoadPointMessage addRoadPointMessage) throws OccupiedPlaceException {
+    private void addRoadPoint(AddRoadPointMessage addRoadPointMessage){
         int distance = addRoadPointMessage.getDistance();
         int lane = addRoadPointMessage.getLane();
         RoadPointInfo roadPointInfo = addRoadPointMessage.getRoadPointInfo();
         //todo check initilization and params
         if (roadArray.get(distance, lane) != null) {
             log.info("Can't put point in to disntace=" + distance + " lane=" + lane);
-            throw new OccupiedPlaceException();
+            getContext().stop(addRoadPointMessage.getRoadPointInfo().getActorRef());
+            getSender().tell(new ErrorAddRoadPointMessage(addRoadPointMessage.getRoadPointInfo().getActorRef()), getSelf());
+            return;
         }
         log.info("Put point into array: distance=" + distance + " lane=" + lane);
         roadArray.put(distance, lane, roadPointInfo);

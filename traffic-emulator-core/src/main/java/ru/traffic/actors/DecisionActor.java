@@ -7,6 +7,7 @@ import akka.event.LoggingAdapter;
 import ru.traffic.messages.NextTimeMessage;
 import ru.traffic.messages.manage.AddRoadPointMessage;
 import ru.traffic.messages.manage.DeleteRoadPointMessage;
+import ru.traffic.messages.manage.ErrorAddRoadPointMessage;
 import ru.traffic.messages.move.MoveMessage;
 import ru.traffic.messages.move.MovesMessage;
 import ru.traffic.model.Move;
@@ -25,12 +26,15 @@ public class DecisionActor extends UntypedActor {
 
     private ActorRef roadActor;
 
+    private ActorRef managerActor;
+
     private int waitingMoves;
 
     private Map<ActorRef, Move> movesMap;
 
-    public DecisionActor(ActorRef roadActor) {
+    public DecisionActor(ActorRef roadActor, ActorRef managerActor) {
         this.roadActor = roadActor;
+        this.managerActor = managerActor;
         movesMap = new HashMap<>();
     }
 
@@ -44,6 +48,8 @@ public class DecisionActor extends UntypedActor {
             addRoadPoint((AddRoadPointMessage)o);
         } else if (o instanceof DeleteRoadPointMessage) {
             deleteRoadPoint((DeleteRoadPointMessage)o);
+        } else if (o instanceof ErrorAddRoadPointMessage) {
+            errorAddRoadPoint((ErrorAddRoadPointMessage)o);
         } else {
             unhandled(o);
         }
@@ -79,7 +85,7 @@ public class DecisionActor extends UntypedActor {
 
         RoadPointInfo roadPointInfo = addRoadPointMessage.getRoadPointInfo();
         log.info("decision add roadPoint: position=" + position + " wishSpeed=" + roadPointInfo.getSpeed());
-        roadActor.tell(addRoadPointMessage, getSender());
+        roadActor.tell(addRoadPointMessage, getSelf());
 
 
         waitingMoves++;
@@ -92,6 +98,15 @@ public class DecisionActor extends UntypedActor {
         movesMap.remove(getSender());
         waitingMoves--;
         log.info("waiting for " + waitingMoves + "moves to process moves");
+        if (waitingMoves == 0) {
+            sendMoves();
+        }
+    }
+
+    private void errorAddRoadPoint(ErrorAddRoadPointMessage errorAddRoadPointMessage) {
+        waitingMoves--;
+        log.info("waiting for " + waitingMoves + "moves to process moves");
+        managerActor.tell(errorAddRoadPointMessage, getSelf());
         if (waitingMoves == 0) {
             sendMoves();
         }

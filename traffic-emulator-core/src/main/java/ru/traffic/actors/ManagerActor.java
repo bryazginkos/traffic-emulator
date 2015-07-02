@@ -8,6 +8,7 @@ import akka.event.LoggingAdapter;
 import ru.traffic.car.Car;
 import ru.traffic.messages.manage.AddRoadPointClientMessage;
 import ru.traffic.messages.manage.AddRoadPointMessage;
+import ru.traffic.messages.manage.ErrorAddRoadPointMessage;
 import ru.traffic.messages.manage.InitMessage;
 import ru.traffic.model.Position;
 import ru.traffic.model.RoadPointInfo;
@@ -38,6 +39,8 @@ public class ManagerActor extends UntypedActor {
             init((InitMessage)o);
         } else if (o instanceof AddRoadPointClientMessage) {
             addRoadPoint((AddRoadPointClientMessage)o);
+        } else if (o instanceof ErrorAddRoadPointMessage) {
+            errorAddRoadPoint((ErrorAddRoadPointMessage)o);
         } else {
             unhandled(o);
         }
@@ -46,7 +49,7 @@ public class ManagerActor extends UntypedActor {
     private void init(InitMessage initMessage) {
         log.info("Create actors for new road: lanes=" + initMessage.getLanes() + " length=" + initMessage.getLength());
         roadActor = getContext().actorOf(Props.create(RoadActor.class, viewActor), "road");
-        decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor), "decision");
+        decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor, getSelf()), "decision");
         roadPointActors = new HashSet<>();
         roadActor.tell(initMessage, getSelf());
     }
@@ -61,5 +64,10 @@ public class ManagerActor extends UntypedActor {
         AddRoadPointMessage addRoadPointMessage = new AddRoadPointMessage(position.getDistance(), position.getLane(), roadPointInfo);
         roadPointActors.add(roadPoint);
         decisionActor.tell(addRoadPointMessage, roadPoint);
+    }
+
+    private void errorAddRoadPoint(ErrorAddRoadPointMessage errorAddRoadPointMessage) {
+        log.info("remove error actor from set");
+        roadPointActors.remove(errorAddRoadPointMessage.getActorRef());
     }
 }
