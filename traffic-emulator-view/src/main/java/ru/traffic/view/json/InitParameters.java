@@ -22,4 +22,12 @@ public class InitParameters {
     public void setLength(int length) {
         this.length = length;
     }
+
+    @Override
+    public String toString() {
+        return "InitParameters{" +
+                "lanes=" + lanes +
+                ", length=" + length +
+                '}';
+    }
 }

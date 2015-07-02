@@ -58,4 +58,16 @@ public class RoadPoint {
     public void setPoliteness(double politeness) {
         this.politeness = politeness;
     }
+
+    @Override
+    public String toString() {
+        return "RoadPoint{" +
+                "distance=" + distance +
+                ", lane=" + lane +
+                ", wishSpeed=" + wishSpeed +
+                ", slowFrontAction='" + slowFrontAction + '\'' +
+                ", stopFrontAction='" + stopFrontAction + '\'' +
+                ", politeness=" + politeness +
+                '}';
+    }
 }
