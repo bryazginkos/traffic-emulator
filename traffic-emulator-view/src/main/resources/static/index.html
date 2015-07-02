@@ -6,11 +6,13 @@
     <script src="stomp.js"></script>
     <script type="text/javascript">
         var stompClient = null;
+        var generatorOn=false;
 
         function setConnected(connected) {
             document.getElementById('connect').disabled = connected;
             document.getElementById('disconnect').disabled = !connected;
             document.getElementById('workDiv').style.visibility = connected ? 'visible' : 'hidden';
+            document.getElementById('generatorDiv').style.visibility = 'hidden';
         }
 
         function connect() {
@@ -40,6 +42,26 @@
             canvas.setAttribute("width", len*10);
             canvas.setAttribute("height", lanes*10);
             stompClient.send("/app/createroad", {}, JSON.stringify({ 'length': len, 'lanes':lanes }));
+            createLanesCheckBoxes(lanes);
+            document.getElementById('generatorDiv').style.visibility = 'visible';
+        }
+
+        function createLanesCheckBoxes(lanes) {
+            for (i=1; i<=lanes; i++) {
+                var checkbox = document.createElement('input');
+                checkbox.type = "checkbox";
+                checkbox.name = "lane" + i;
+                checkbox.value = "false";
+                checkbox.id = "lane" + i;
+
+                var label = document.createElement('label')
+                label.htmlFor = "lane" + i;
+                label.appendChild(document.createTextNode("Lane " + i));
+
+                document.getElementById('lanesCheckBoxes').appendChild(checkbox);
+                document.getElementById('lanesCheckBoxes').appendChild(label);
+                document.getElementById('lanesCheckBoxes').appendChild(document.createElement("br"));
+            }
         }
 
         function sendAddRoadPoint(distance, lane, wishSpeed, slowFrontAction, stopFrontAction, politeness) {
@@ -82,13 +104,45 @@
         <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
     </div>
     <div id="workDiv">
-        <label>Road's length: </label><input type="text" id="roadLength" /> <br/>
-        <label>Lanes Number:</label><input type="text" id="roadLanes" /> <br/>
-        <button id="sendName" onclick="sendRoadParams();">Create Road</button> <br/>
-
+        <label>Road's length: </label><input type="text" id="roadLength"/> <br/>
+        <label>Lanes Number:</label><input type="text" id="roadLanes"/> <br/>
+        <button id="sendName" onclick="sendRoadParams();">Create Road</button>
+        <br/>
+        <br/>
         <canvas id="myCanvas" width="1" height="1">
             <!-- Insert fallback content here -->
         </canvas>
+        <br/>
+
+        <div id="generatorDiv">
+            <h3>Generator parameters</h3>
+            Lanes:
+            <div id="lanesCheckBoxes">
+
+            </div>
+            <br/>
+
+            WishSpeed: <br/>
+            <input type="radio" name="wishSpeedRadio" value="1" checked/> 1 <br/>
+            <input type="radio" name="wishSpeedRadio" value="2"/> 2 <br/>
+            <input type="radio" name="wishSpeedRadio" value="3"/> 3 <br/>
+            <br/>
+            Front slow strategy: <br/>
+            <input type="radio" name="frontSlowStrategy" value="slow" checked/> Slow <br/>
+            <input type="radio" name="frontSlowStrategy" value="side"/> Side <br/>
+            <br/>
+            Front stop strategy: <br/>
+            <input type="radio" name="frontStopStrategy" value="stop" checked/> Stop <br/>
+            <input type="radio" name="frontStopStrategy" value="side"/> Side <br/>
+            <br/>
+            Politeness: <input type="text" name="politenessField"/> <br/>
+            <br/>
+            Probability <input type="text" name="probabilityField"/> <br/>
+            <br/>
+            <input type="button" name="generatorOnBtn" value="Turn on"/> &nbsp;
+            <input type="button" name="generatorOffBtn" value="Turn off"/><br/>
+            </form>
+        </div>
     </div>
 </div>
 </body>
