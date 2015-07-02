@@ -62,6 +62,8 @@ public class RoadActor extends UntypedActor {
         }
         log.info("Put point into array: distance=" + distance + " lane=" + lane);
         roadArray.put(distance, lane, roadPointInfo);
+        NextTimeMessage nextTimeMessage = new NextTimeMessage(roadArray);
+        roadPointInfo.getActorRef().tell(nextTimeMessage, getSelf());
     }
 
     private void doMoves(MovesMessage movesMessage) throws AccidentException, InterruptedException {

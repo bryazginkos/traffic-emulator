@@ -11,6 +11,7 @@ import ru.traffic.messages.move.MoveMessage;
 import ru.traffic.messages.move.MovesMessage;
 import ru.traffic.model.Move;
 import ru.traffic.model.Position;
+import ru.traffic.model.RoadPointInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,16 +77,13 @@ public class DecisionActor extends UntypedActor {
         int lane = addRoadPointMessage.getLane();
         Position position = new Position(distance, lane);
 
-        log.info("decision add roadPoint: position=" + position + " wishSpeed=" + addRoadPointMessage.getRoadPointInfo().getSpeed());
+        RoadPointInfo roadPointInfo = addRoadPointMessage.getRoadPointInfo();
+        log.info("decision add roadPoint: position=" + position + " wishSpeed=" + roadPointInfo.getSpeed());
         roadActor.tell(addRoadPointMessage, getSender());
 
-        Move move = new Move(position, position);
-        //to catch accident
-        movesMap.put(getSender(), move);
+
+        waitingMoves++;
         log.info("waiting for " + waitingMoves + "moves to process moves");
-        if (waitingMoves == 0) {
-            sendMoves();
-        }
     }
 
     private void deleteRoadPoint(DeleteRoadPointMessage deleteRoadPointMessage) {

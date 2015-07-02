@@ -7,7 +7,7 @@ import akka.actor.ActorRef;
  */
 public class RoadPointInfo {
     private int speed;
-    private ActorRef actorRef;
+    private final ActorRef actorRef;
 
     public RoadPointInfo(int speed, ActorRef actorRef) {
         this.speed = speed;
@@ -20,6 +20,10 @@ public class RoadPointInfo {
 
     public void setSpeed(int speed) {
         this.speed = speed;
+    }
+
+    public ActorRef getActorRef() {
+        return actorRef;
     }
 
     //todo normal methods
