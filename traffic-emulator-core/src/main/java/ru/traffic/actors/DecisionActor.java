@@ -14,8 +14,7 @@ import ru.traffic.model.Move;
 import ru.traffic.model.Position;
 import ru.traffic.model.RoadPointInfo;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Константин on 30.06.2015.
@@ -32,10 +31,16 @@ public class DecisionActor extends UntypedActor {
 
     private Map<ActorRef, Move> movesMap;
 
+    private List<AddRoadPointMessage> buffer;
+
+    private Phase phase;
+
     public DecisionActor(ActorRef roadActor, ActorRef managerActor) {
         this.roadActor = roadActor;
         this.managerActor = managerActor;
         movesMap = new HashMap<>();
+        buffer = new ArrayList<>();
+        phase = Phase.WAITING_INITILIZATION;
     }
 
     @Override
@@ -56,10 +61,14 @@ public class DecisionActor extends UntypedActor {
     }
 
     private void nextTime(NextTimeMessage nextTimeMessage) {
-        log.info("nextTime");
+        phase = Phase.COLLECTING_MOVES;
+        log.info("nextTime (waiting for " + nextTimeMessage.getState().getElementsNum() +" moves and  + " + buffer.size() + " moves will add from new points)");
         waitingMoves = nextTimeMessage.getState().getElementsNum();
+        buffer.forEach(addRoadPointMessage -> addRoadPoint(addRoadPointMessage));
+        buffer.clear();
         movesMap.entrySet().forEach(entry -> entry.getKey().tell(nextTimeMessage, getSelf()));
         movesMap = new HashMap<>(waitingMoves);
+        phase = Phase.COLLECTING_MOVES;
     }
 
     private void takeMove(MoveMessage moveMessage) {
@@ -75,6 +84,7 @@ public class DecisionActor extends UntypedActor {
     private void sendMoves() {
         log.info("send decisions");
         MovesMessage movesMessage = new MovesMessage(movesMap.values());
+        phase = Phase.WAITING_PROCESSING;
         roadActor.tell(movesMessage, getSelf());
     }
 
@@ -85,11 +95,23 @@ public class DecisionActor extends UntypedActor {
 
         RoadPointInfo roadPointInfo = addRoadPointMessage.getRoadPointInfo();
         log.info("decision add roadPoint: position=" + position + " wishSpeed=" + roadPointInfo.getSpeed());
-        roadActor.tell(addRoadPointMessage, getSelf());
 
+        switch (phase) {
+            case COLLECTING_MOVES:
+            case WAITING_INITILIZATION:{
+                roadActor.tell(addRoadPointMessage, getSelf());
+                waitingMoves++;
+                log.info("waiting for " + waitingMoves + "moves to process moves");
+                break;
+            }
+            case WAITING_PROCESSING:
+            {
+                buffer.add(addRoadPointMessage);
+                log.info("Adding will be handled next time");
+                break;
+            }
 
-        waitingMoves++;
-        log.info("waiting for " + waitingMoves + "moves to process moves");
+        }
     }
 
     private void deleteRoadPoint(DeleteRoadPointMessage deleteRoadPointMessage) {
@@ -110,5 +132,11 @@ public class DecisionActor extends UntypedActor {
         if (waitingMoves == 0) {
             sendMoves();
         }
+    }
+
+    private static enum Phase {
+        COLLECTING_MOVES,
+        WAITING_PROCESSING,
+        WAITING_INITILIZATION
     }
 }
