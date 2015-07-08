@@ -21,7 +21,22 @@
             document.getElementById('generatorDiv').style.visibility = 'hidden';
         }
 
+        function prepareCanvas() {
+            var canvas = document.getElementById("myCanvas");
+            var elemLeft = canvas.offsetLeft;
+
+            canvas.addEventListener('click', function(event) {
+                var elemTop = canvas.offsetTop;
+                var x = event.pageX - elemLeft;
+                var y = event.pageY - elemTop;
+                var distance = Math.round((x+5)/10);
+                var lane = Math.round((y+5)/10);
+                sendAddRoadPoint(distance, lane, 0, "slow", "stop", 0);
+            }, false);
+        }
+
         function connect() {
+            prepareCanvas();
             var socket = new SockJS('/websocketservice');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
