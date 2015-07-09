@@ -48,7 +48,7 @@ public class RoadActor extends UntypedActor {
         log.info("Create Road: lanes=" + initMessage.getLanes() + " length=" + initMessage.getLength());
         int lanes = initMessage.getLanes();
         int length = initMessage.getLength();
-        roadArray = new RoadArray(length, lanes, RoadPointInfo.class);
+        roadArray = new RoadArray<>(length, lanes, RoadPointInfo.class);
     }
 
     private void addRoadPoint(AddRoadPointMessage addRoadPointMessage){
@@ -56,12 +56,6 @@ public class RoadActor extends UntypedActor {
         int lane = addRoadPointMessage.getLane();
         RoadPointInfo roadPointInfo = addRoadPointMessage.getRoadPointInfo();
         //todo check initilization and params
-        if (roadArray.get(distance, lane) != null) {
-            log.info("Can't put point in to disntace=" + distance + " lane=" + lane);
-            getContext().stop(addRoadPointMessage.getRoadPointInfo().getActorRef());
-            getSender().tell(new ErrorAddRoadPointMessage(addRoadPointMessage.getRoadPointInfo().getActorRef()), getSelf());
-            return;
-        }
         log.info("Put point into array: distance=" + distance + " lane=" + lane);
         roadArray.put(distance, lane, roadPointInfo);
         NextTimeMessage nextTimeMessage = new NextTimeMessage(roadArray);

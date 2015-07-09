@@ -57,14 +57,13 @@ public class DecisionActor extends UntypedActor {
             addRoadPoint((AddRoadPointMessage)o);
         } else if (o instanceof DeleteRoadPointMessage) {
             deleteRoadPoint((DeleteRoadPointMessage)o);
-        } else if (o instanceof ErrorAddRoadPointMessage) {
-            errorAddRoadPoint((ErrorAddRoadPointMessage)o);
         } else {
             unhandled(o);
         }
     }
 
     private void nextTime(NextTimeMessage nextTimeMessage) {
+        resetPointsMap(nextTimeMessage.getState());
         phase = Phase.COLLECTING_MOVES;
         log.info("nextTime (waiting for " + nextTimeMessage.getState().getElementsNum() +" moves and  + " + buffer.size() + " moves will add from new points)");
         waitingMoves = nextTimeMessage.getState().getElementsNum();
@@ -73,7 +72,6 @@ public class DecisionActor extends UntypedActor {
         movesMap.entrySet().forEach(entry -> entry.getKey().tell(nextTimeMessage, getSelf()));
         movesMap = new HashMap<>(waitingMoves);
         phase = Phase.COLLECTING_MOVES;
-        resetPointsMap(nextTimeMessage.getState());
     }
 
     private void takeMove(MoveMessage moveMessage) {
@@ -105,10 +103,16 @@ public class DecisionActor extends UntypedActor {
         switch (phase) {
             case COLLECTING_MOVES:
             case WAITING_INITILIZATION:{
-                addToPointsMap(distance, lane, roadPointInfo.getActorRef());
-                roadActor.tell(addRoadPointMessage, getSelf());
-                waitingMoves++;
-                log.info("waiting for " + waitingMoves + "moves to process moves");
+                boolean allow = tryAddToPointsMap(distance, lane, roadPointInfo.getActorRef());
+                if (allow) {
+                    roadActor.tell(addRoadPointMessage, getSelf());
+                    waitingMoves++;
+                    log.info("waiting for " + waitingMoves + "moves to process moves");
+                } else {
+                    log.info("Can't put point in to distance=" + distance + " lane=" + lane);
+                    getContext().stop(addRoadPointMessage.getRoadPointInfo().getActorRef());
+                    managerActor.tell(new ErrorAddRoadPointMessage(addRoadPointMessage.getRoadPointInfo().getActorRef()), getSelf());
+                }
                 break;
             }
             case WAITING_PROCESSING:
@@ -127,15 +131,6 @@ public class DecisionActor extends UntypedActor {
         movesMap.remove(getSender());
         waitingMoves--;
         log.info("waiting for " + waitingMoves + "moves to process moves");
-        if (waitingMoves == 0) {
-            sendMoves();
-        }
-    }
-
-    private void errorAddRoadPoint(ErrorAddRoadPointMessage errorAddRoadPointMessage) {
-        waitingMoves--;
-        log.info("waiting for " + waitingMoves + "moves to process moves");
-        managerActor.tell(errorAddRoadPointMessage, getSelf());
         if (waitingMoves == 0) {
             sendMoves();
         }
@@ -173,9 +168,12 @@ public class DecisionActor extends UntypedActor {
 
     }
 
-    private void addToPointsMap(int distance, int lane, ActorRef actorRef) {
-        assert pointsMap.get(distance, lane) == null; //todo error add
+    private boolean tryAddToPointsMap(int distance, int lane, ActorRef actorRef) {
+        if (pointsMap.get(distance, lane) != null) {
+            return false;
+        }
         pointsMap.put(distance, lane, actorRef);
+        return true;
     }
 
     private enum Phase {
