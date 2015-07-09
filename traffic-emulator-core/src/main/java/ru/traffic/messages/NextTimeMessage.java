@@ -8,7 +8,7 @@ import ru.traffic.util.RoadArray;
  */
 public class NextTimeMessage {
 
-    private final RoadArray state;
+    private final RoadArray<RoadPointInfo> state;
 
     public NextTimeMessage(RoadArray<RoadPointInfo> state) {
         this.state = state;
