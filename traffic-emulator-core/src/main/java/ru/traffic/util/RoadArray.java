@@ -50,6 +50,7 @@ public class RoadArray<T> {
     }
 
     public void clear() {
+        elementsNum = 0;
         for (int i = 0; i < length; i ++) {
             Arrays.setAll(array[i], t -> null);
         }
