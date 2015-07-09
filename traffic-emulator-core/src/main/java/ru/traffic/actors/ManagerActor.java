@@ -49,7 +49,7 @@ public class ManagerActor extends UntypedActor {
     private void init(InitMessage initMessage) {
         log.info("Create actors for new road: lanes=" + initMessage.getLanes() + " length=" + initMessage.getLength());
         roadActor = getContext().actorOf(Props.create(RoadActor.class, viewActor), "road");
-        decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor, getSelf()), "decision");
+        decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor, getSelf(), initMessage.getLanes(), initMessage.getLength()), "decision");
         roadPointActors = new HashSet<>();
         roadActor.tell(initMessage, getSelf());
     }
