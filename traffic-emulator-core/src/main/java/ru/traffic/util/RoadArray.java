@@ -1,7 +1,5 @@
 package ru.traffic.util;
 
-import ru.traffic.model.RoadPointInfo;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
@@ -48,6 +46,12 @@ public class RoadArray<T> {
         array[distance - 1][lane - 1] = element;
         if (element != null) {
             elementsNum++;
+        }
+    }
+
+    public void clear() {
+        for (int i = 0; i < length; i ++) {
+            Arrays.setAll(array[i], t -> null);
         }
     }
 
