@@ -3,6 +3,9 @@ package ru.traffic.util;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import ru.traffic.car.CarImpl;
+import ru.traffic.car.SlowFrontAction;
+import ru.traffic.car.StopFrontAction;
 import ru.traffic.model.RoadPointInfo;
 
 /**
@@ -17,8 +20,8 @@ public class RoadArrayTest {
 
     @Before
     public void initialization() {
-        roadArray = new RoadArray(LENGTH, LANES_NUMBER);
-        roadPointInfo = new RoadPointInfo(12, null);
+        roadArray = new RoadArray(LENGTH, LANES_NUMBER, RoadPointInfo.class);
+        roadPointInfo = new RoadPointInfo(new CarImpl(100, 12, SlowFrontAction.SLOW, StopFrontAction.STOP), null);
     }
 
     @Test

@@ -22,7 +22,7 @@ public class RoadActor extends UntypedActor {
 
     private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
-    private RoadArray roadArray;
+    private RoadArray<RoadPointInfo> roadArray;
     private ActorRef viewActor;
 
     public RoadActor(ActorRef viewActor) {
@@ -48,7 +48,7 @@ public class RoadActor extends UntypedActor {
         log.info("Create Road: lanes=" + initMessage.getLanes() + " length=" + initMessage.getLength());
         int lanes = initMessage.getLanes();
         int length = initMessage.getLength();
-        roadArray = new RoadArray(length, lanes);
+        roadArray = new RoadArray(length, lanes, RoadPointInfo.class);
     }
 
     private void addRoadPoint(AddRoadPointMessage addRoadPointMessage){

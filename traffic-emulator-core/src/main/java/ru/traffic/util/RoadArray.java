@@ -6,41 +6,41 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 
 /**
- * Created by Константин on 30.06.2015.
+ * Created by пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ on 30.06.2015.
  */
-public class RoadArray implements Cloneable {
+public class RoadArray<T> {
 
     private final int length;
     private final int lanesNumber;
     private int elementsNum;
 
-    private final RoadPointInfo[][] array;
+    private final T[][] array;
 
-    public RoadArray(int length, int lanesNumber) {
+    public RoadArray(int length, int lanesNumber, Class<T> tClass) {
         this.length = length;
         this.lanesNumber = lanesNumber;
-        array = new RoadPointInfo[length][lanesNumber];
+        array = (T[][]) Array.newInstance(tClass, length, lanesNumber);
         elementsNum = 0;
     }
 
-    public RoadArray(RoadArray roadArray) {
+    public RoadArray(RoadArray<T> roadArray, Class<T> tClass) {
         this.length = roadArray.getLength();
         this.lanesNumber = roadArray.getLanesNumber();
         this.elementsNum = roadArray.getElementsNum();
-        array = new RoadPointInfo[length][lanesNumber];
+        array = (T[][]) Array.newInstance(tClass, length, lanesNumber);
         for (int i = 0; i < length; i ++) {
             array[i] = Arrays.copyOf(roadArray.array[i], lanesNumber);
         }
     }
 
     //todo check params
-    public RoadPointInfo get (int distance, int lane) {
+    public T get (int distance, int lane) {
         return array[distance - 1][lane - 1];
     }
 
     //todo check params
-    public void put(int distance, int lane, RoadPointInfo element) {
-        RoadPointInfo old = array[distance -1][lane -1];
+    public void put(int distance, int lane, T element) {
+        T old = array[distance -1][lane -1];
         if (old != null) {
             elementsNum--;
         }

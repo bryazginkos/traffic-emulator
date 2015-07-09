@@ -20,7 +20,7 @@ public class MoveProcessor {
         }
     }
 
-    private static void doMove(RoadArray state, Move move) throws AccidentException {
+    private static void doMove(RoadArray<RoadPointInfo> state, Move move) throws AccidentException {
         Position from = move.getFrom();
         Position to = move.getTo();
         if (from.equals(to)) {

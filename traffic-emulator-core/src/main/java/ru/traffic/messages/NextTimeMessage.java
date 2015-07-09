@@ -1,5 +1,6 @@
 package ru.traffic.messages;
 
+import ru.traffic.model.RoadPointInfo;
 import ru.traffic.util.RoadArray;
 
 /**
@@ -9,11 +10,11 @@ public class NextTimeMessage {
 
     private final RoadArray state;
 
-    public NextTimeMessage(RoadArray state) {
+    public NextTimeMessage(RoadArray<RoadPointInfo> state) {
         this.state = state;
     }
 
-    public RoadArray getState() {
+    public RoadArray<RoadPointInfo> getState() {
         return state;
     }
 }
