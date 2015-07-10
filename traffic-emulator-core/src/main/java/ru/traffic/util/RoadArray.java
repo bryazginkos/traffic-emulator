@@ -2,6 +2,7 @@ package ru.traffic.util;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.function.Predicate;
 
 /**
  * Created by ���������� on 30.06.2015.
@@ -46,6 +47,13 @@ public class RoadArray<T> {
         array[distance - 1][lane - 1] = element;
         if (element != null) {
             elementsNum++;
+        }
+    }
+
+    public void putWithCondition(int distance, int lane, T element, Predicate<T> predicate) {
+        T oldElement = get(distance, lane);
+        if (predicate.test(oldElement)) {
+            put(distance, lane, element);
         }
     }
 
