@@ -1,15 +1,15 @@
 package ru.traffic.processing;
 
-import ru.traffic.exception.OutOfViewException;
 import ru.traffic.model.Position;
 import ru.traffic.util.RoadArray;
 
 /**
  * Created by Константин on 30.06.2015.
  */
+//todo must be actor
 public class InfoProcessor {
 
-    public static int freeFrontSpace(RoadArray state, Position position, int Maxinterval) throws OutOfViewException {
+    public static Integer freeFrontSpace(RoadArray state, Position position, int Maxinterval) {
         //todo check params
         int viewInterval = 0;
         int distance = position.getDistance();
@@ -19,7 +19,7 @@ public class InfoProcessor {
             viewInterval++;
             int viewDistance = distance + viewInterval;
             if (viewDistance > state.getLength()) {
-                throw new OutOfViewException();
+                return null;
             }
             if (state.get(viewDistance, lane) != null) {
                 return viewInterval - 1;

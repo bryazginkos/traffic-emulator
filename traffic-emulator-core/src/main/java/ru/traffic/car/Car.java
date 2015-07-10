@@ -9,8 +9,10 @@ public interface Car {
 
     boolean askSkip();
 
+    @Deprecated
     SlowFrontAction slowFront();
 
+    @Deprecated
     StopFrontAction stopFront();
 
 }

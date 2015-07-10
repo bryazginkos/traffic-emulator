@@ -10,6 +10,7 @@ import ru.traffic.messages.manage.DeleteRoadPointMessage;
 import ru.traffic.messages.manage.ErrorAddRoadPointMessage;
 import ru.traffic.messages.move.MoveMessage;
 import ru.traffic.messages.move.MovesMessage;
+import ru.traffic.messages.talk.ChangeMoveMessage;
 import ru.traffic.model.Move;
 import ru.traffic.model.Position;
 import ru.traffic.model.RoadPointInfo;
@@ -21,6 +22,8 @@ import java.util.*;
  * Created by Константин on 30.06.2015.
  */
 public class DecisionActor extends UntypedActor {
+
+    private final static int MAX_SPEED = 3;
 
     private LoggingAdapter log = Logging.getLogger(getContext().system(), this);
 
@@ -76,9 +79,21 @@ public class DecisionActor extends UntypedActor {
 
     private void takeMove(MoveMessage moveMessage) {
         log.info("take move decision move=" + moveMessage.getMove());
+        ActorRef competitor = tryRegisterMove(moveMessage.getMove(), getSender());
+        if (competitor != null) {
+            if (moveMessage.getMove().getFrom().getLane() == moveMessage.getMove().getTo().getLane()) {
+                waitingMoves++;
+                log.info("rewrite move");
+                competitor.tell(new ChangeMoveMessage(true, getSender()), getSelf());
+
+            } else {
+                log.info("move is impossible");
+                getSender().tell(new ChangeMoveMessage(true, competitor), getSelf());
+                return;
+            }
+        }
         waitingMoves--;
         movesMap.put(getSender(), moveMessage.getMove());
-        fillPointsMap(moveMessage.getMove(), getSender());
         log.info("waiting for " + waitingMoves + "moves to process moves");
         if (waitingMoves == 0) {
             sendMoves();
@@ -148,24 +163,47 @@ public class DecisionActor extends UntypedActor {
         }
     }
 
-    private void fillPointsMap(Move move, ActorRef actorRef) {
+    private ActorRef tryRegisterMove(Move move, ActorRef actorRef) {
+        removeMoveIfExist(actorRef, move.getFrom());
         int distanceTo = move.getTo().getDistance();
         int distanceFrom = move.getFrom().getDistance();
         int laneTo = move.getTo().getLane();
         int laneFrom = move.getFrom().getLane();
 
-        int rectLen = distanceTo - distanceFrom;
-        int rectLan = laneTo - laneFrom;
+        int deltaDistance = distanceTo - distanceFrom;
 
         assert pointsMap.get(distanceFrom, laneFrom) == actorRef;
 
-        for (int i = 1; i <= rectLen; i++) {
-            for (int j = 1; j <= rectLan; j++) {
-                assert  pointsMap.get(distanceFrom + i, laneFrom + j) == null; //todo error move
-                pointsMap.put(distanceFrom + i, laneFrom + j, actorRef);
-            }
+        for (int i = 1; i <= deltaDistance; i++) {
+            ActorRef competitorNeighbour = pointsMap.get(distanceFrom + i, laneTo);
+            if (competitorNeighbour != null) return competitorNeighbour;
+        }
+        if (laneTo != laneFrom) {
+            ActorRef competitorNeighbour = pointsMap.get(distanceFrom, laneTo);
+            if (competitorNeighbour != null) return competitorNeighbour;
         }
 
+        for (int i = 1; i <= deltaDistance; i++) {
+            pointsMap.put(distanceFrom + i, laneTo, actorRef);
+        }
+        if (laneFrom != laneTo) {
+            pointsMap.put(distanceFrom, laneTo, actorRef);
+        }
+        return null;
+    }
+
+    private void removeMoveIfExist(ActorRef actorRef, Position fromPosition) {
+        int distanceFrom = fromPosition.getDistance();
+        int laneFrom = fromPosition.getLane();
+        boolean left = laneFrom == 1;
+        boolean right = laneFrom == pointsMap.getLanesNumber();
+        int i = 0;
+        while (i <= MAX_SPEED && distanceFrom + i <= pointsMap.getLength()) {
+            if (!left) pointsMap.putWithCondition(distanceFrom + i, laneFrom - 1, null, oldAct -> oldAct == actorRef);
+            if (!right) pointsMap.putWithCondition(distanceFrom + i, laneFrom + 1, null, oldAct -> oldAct == actorRef);
+            if (i != 0) pointsMap.putWithCondition(distanceFrom + i, laneFrom, null, oldAct -> oldAct == actorRef);
+            i++;
+        }
     }
 
     private boolean tryAddToPointsMap(int distance, int lane, ActorRef actorRef) {
