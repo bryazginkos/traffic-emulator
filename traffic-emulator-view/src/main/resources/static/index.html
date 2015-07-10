@@ -31,7 +31,7 @@
                 var y = event.pageY - elemTop;
                 var distance = Math.round((x+5)/10);
                 var lane = Math.round((y+5)/10);
-                sendAddRoadPoint(distance, lane, 0, "slow", "stop", 0);
+                sendAddRoadPoint(distance, lane, 0, 0);
             }, false);
         }
 
@@ -94,10 +94,8 @@
                     var probability = document.getElementById('probabilityField').value;
                     if (Math.random() < probability/100 && laneActive) {
                         var politeness = document.getElementById('politenessField').value;
-                        var frontStop = getRadioValue(document.getElementsByName('frontStopStrategy'));
-                        var frontSlow = getRadioValue(document.getElementsByName('frontSlowStrategy'));
                         var wishSpeed = getRadioValue(document.getElementsByName('wishSpeedRadio'));
-                        sendAddRoadPoint(1, i, wishSpeed, frontSlow, frontStop, politeness/100);
+                        sendAddRoadPoint(1, i, wishSpeed, politeness/100);
                     }
                 }
             }
@@ -112,10 +110,9 @@
             return null;
         }
 
-        function sendAddRoadPoint(distance, lane, wishSpeed, slowFrontAction, stopFrontAction, politeness) {
+        function sendAddRoadPoint(distance, lane, wishSpeed, politeness) {
             stompClient.send("/app/createpoint", {}, JSON.stringify({ 'distance': distance,
-                'lane': lane, 'wishSpeed': wishSpeed, 'slowFrontAction': slowFrontAction,
-            'stopFrontAction': stopFrontAction, 'politeness': politeness}));
+                'lane': lane, 'wishSpeed': wishSpeed, 'politeness': politeness}));
         }
 
         function showRoad(points, lanes, len) {
@@ -174,14 +171,6 @@
             <input type="radio" name="wishSpeedRadio" value="1" checked="checked"/> 1 <br/>
             <input type="radio" name="wishSpeedRadio" value="2"/> 2 <br/>
             <input type="radio" name="wishSpeedRadio" value="3"/> 3 <br/>
-            <br/>
-            Front slow strategy: <br/>
-            <input type="radio" name="frontSlowStrategy" value="slow" checked/> Slow <br/>
-            <input type="radio" name="frontSlowStrategy" value="side"/> Side <br/>
-            <br/>
-            Front stop strategy: <br/>
-            <input type="radio" name="frontStopStrategy" value="stop" checked/> Stop <br/>
-            <input type="radio" name="frontStopStrategy" value="side"/> Side <br/>
             <br/>
             Politeness: <input type="text" id="politenessField"/> <br/>
             <br/>

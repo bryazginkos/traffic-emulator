@@ -7,8 +7,6 @@ public class RoadPoint {
     private int distance;
     private int lane;
     private int wishSpeed;
-    private String slowFrontAction;
-    private String stopFrontAction;
     private double politeness;
 
     public int getDistance() {
@@ -35,22 +33,6 @@ public class RoadPoint {
         this.wishSpeed = wishSpeed;
     }
 
-    public String getSlowFrontAction() {
-        return slowFrontAction;
-    }
-
-    public void setSlowFrontAction(String slowFrontAction) {
-        this.slowFrontAction = slowFrontAction;
-    }
-
-    public String getStopFrontAction() {
-        return stopFrontAction;
-    }
-
-    public void setStopFrontAction(String stopFrontAction) {
-        this.stopFrontAction = stopFrontAction;
-    }
-
     public double getPoliteness() {
         return politeness;
     }
@@ -65,8 +47,6 @@ public class RoadPoint {
                 "distance=" + distance +
                 ", lane=" + lane +
                 ", wishSpeed=" + wishSpeed +
-                ", slowFrontAction='" + slowFrontAction + '\'' +
-                ", stopFrontAction='" + stopFrontAction + '\'' +
                 ", politeness=" + politeness +
                 '}';
     }

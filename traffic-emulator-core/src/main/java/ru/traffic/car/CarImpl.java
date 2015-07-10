@@ -9,31 +9,14 @@ public class CarImpl implements Car {
 
     private int wishSpeed;
 
-    private SlowFrontAction slowFrontAction;
-
-    private StopFrontAction stopFrontAction;
-
-    public CarImpl(double politeness, int wishSpeed, SlowFrontAction slowFrontAction, StopFrontAction stopFrontAction) {
+    public CarImpl(double politeness, int wishSpeed) {
         this.politeness = politeness;
         this.wishSpeed = wishSpeed;
-        this.slowFrontAction = slowFrontAction;
-        this.stopFrontAction = stopFrontAction;
     }
 
     @Override
     public boolean askSkip() {
         return Math.random() < politeness;
-    }
-
-
-    @Override
-    public SlowFrontAction slowFront() {
-        return slowFrontAction;
-    }
-
-    @Override
-    public StopFrontAction stopFront() {
-        return stopFrontAction;
     }
 
     @Override
@@ -46,8 +29,6 @@ public class CarImpl implements Car {
         return "CarImpl{" +
                 "politeness=" + politeness +
                 ", wishSpeed=" + wishSpeed +
-                ", slowFrontAction=" + slowFrontAction +
-                ", stopFrontAction=" + stopFrontAction +
                 '}';
     }
 }
