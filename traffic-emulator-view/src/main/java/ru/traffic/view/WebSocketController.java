@@ -12,11 +12,10 @@ import org.springframework.stereotype.Controller;
 import ru.traffic.actors.ManagerActor;
 import ru.traffic.car.Car;
 import ru.traffic.car.CarImpl;
-import ru.traffic.car.SlowFrontAction;
-import ru.traffic.car.StopFrontAction;
 import ru.traffic.messages.manage.AddRoadPointClientMessage;
 import ru.traffic.messages.manage.InitMessage;
 import ru.traffic.model.Position;
+import ru.traffic.model.RoadPointInfo;
 import ru.traffic.util.RoadArray;
 import ru.traffic.view.json.InitParameters;
 import ru.traffic.view.json.Road;
@@ -44,7 +43,7 @@ public class WebSocketController {
     @MessageMapping("/createroad")
     public void createRoad(InitParameters initParameters) throws Exception {
         log.info("createRoad(" + initParameters + ")");
-        Consumer<RoadArray> viewConsumer = roadArray -> sendResult(roadArray);
+        Consumer<RoadArray<RoadPointInfo>> viewConsumer = this::sendResult;
 
         ActorSystem actorSystem = ActorSystem.create("traffic");
         manager = actorSystem.actorOf(Props.create(ManagerActor.class, viewConsumer), "manager");
@@ -69,7 +68,7 @@ public class WebSocketController {
 
     private void sendNewRoad(int lanes, int length) {
         Road road = new Road();
-        road.setPoints(new int[length][lanes]);
+        road.setPoints(new String[length][lanes]);
         road.setLength(length);
         road.setLanes(lanes);
         messagingTemplate.convertAndSend("/topic/to", road);

@@ -1,6 +1,7 @@
 package ru.traffic.model;
 
 import akka.actor.ActorRef;
+import ru.traffic.car.Car;
 
 /**
  * Created by Константин on 30.06.2015.
@@ -8,9 +9,11 @@ import akka.actor.ActorRef;
 public class RoadPointInfo {
     private int speed;
     private final ActorRef actorRef;
+    private final Car car;
 
-    public RoadPointInfo(int speed, ActorRef actorRef) {
-        this.speed = speed;
+    public RoadPointInfo(Car car, ActorRef actorRef) {
+        this.car = car;
+        this.speed = car.wishSpeed();
         this.actorRef = actorRef;
     }
 
@@ -24,6 +27,10 @@ public class RoadPointInfo {
 
     public ActorRef getActorRef() {
         return actorRef;
+    }
+
+    public Car getCar() {
+        return car;
     }
 
     //todo normal methods

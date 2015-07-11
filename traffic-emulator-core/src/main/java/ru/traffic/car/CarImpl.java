@@ -32,6 +32,14 @@ public class CarImpl implements Car {
         return Math.random() < effrontery;
     }
 
+    public double getPoliteness() {
+        return politeness;
+    }
+
+    public double getEffrontery() {
+        return effrontery;
+    }
+
     @Override
     public String toString() {
         return "CarImpl{" +

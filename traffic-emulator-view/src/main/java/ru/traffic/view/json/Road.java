@@ -5,17 +5,17 @@ package ru.traffic.view.json;
  */
 public class Road {
 
-    private int[][] points;
+    private String[][] points;
 
     private int lanes;
 
     private int length;
 
-    public int[][] getPoints() {
+    public String[][] getPoints() {
         return points;
     }
 
-    public void setPoints(int[][] points) {
+    public void setPoints(String[][] points) {
         this.points = points;
     }
 

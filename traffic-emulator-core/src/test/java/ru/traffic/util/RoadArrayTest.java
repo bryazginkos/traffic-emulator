@@ -21,7 +21,7 @@ public class RoadArrayTest {
     @Before
     public void initialization() {
         roadArray = new RoadArray(LENGTH, LANES_NUMBER, RoadPointInfo.class);
-        roadPointInfo = new RoadPointInfo(12, null);
+        roadPointInfo = new RoadPointInfo(new CarImpl(1, 1, 2), null);
     }
 
     @Test

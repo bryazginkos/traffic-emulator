@@ -60,7 +60,7 @@ public class ManagerActor extends UntypedActor {
         Car car = addRoadPointClientMessage.getCar();
         //todo generate name?
         ActorRef roadPoint = getContext().actorOf(Props.create(CarActor.class, decisionActor, car, position));
-        RoadPointInfo roadPointInfo = new RoadPointInfo(car.wishSpeed(), roadPoint);
+        RoadPointInfo roadPointInfo = new RoadPointInfo(car, roadPoint);
         AddRoadPointMessage addRoadPointMessage = new AddRoadPointMessage(position.getDistance(), position.getLane(), roadPointInfo);
         roadPointActors.add(roadPoint);
         decisionActor.tell(addRoadPointMessage, roadPoint);

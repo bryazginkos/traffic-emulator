@@ -131,11 +131,11 @@
         }
 
         function showPoint(ctx, x, y, viewType) {
-            if (viewType == 0) {
-                ctx.fillStyle = "rgb(0, 0, 0)";
+            if (viewType == null) {
+                ctx.fillStyle = "rgb(255, 255, 255)";
             }
-            if (viewType == 1) {
-                ctx.fillStyle = "rgb(255, 0, 0)";
+            else {
+                ctx.fillStyle = viewType;
             }
             ctx.fillRect(x - 4, y -4, 8, 8);
         }
@@ -155,7 +155,7 @@
         <button id="sendName" onclick="sendRoadParams();">Create Road</button>
         <br/>
         <br/>
-        <canvas id="myCanvas" width="1" height="1">
+        <canvas id="myCanvas" width="1" height="1" style="border-color: black; border-width: medium;">
             <!-- Insert fallback content here -->
         </canvas>
         <br/>
