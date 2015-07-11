@@ -9,4 +9,6 @@ public interface Car {
 
     boolean askSkip();
 
+    boolean willAsk();
+
 }

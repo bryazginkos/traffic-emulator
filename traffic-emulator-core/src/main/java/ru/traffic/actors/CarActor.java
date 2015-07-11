@@ -8,6 +8,8 @@ import ru.traffic.car.Car;
 import ru.traffic.messages.NextTimeMessage;
 import ru.traffic.messages.manage.DeleteRoadPointMessage;
 import ru.traffic.messages.move.MoveMessage;
+import ru.traffic.messages.talk.AnsSkipMessage;
+import ru.traffic.messages.talk.AskSkipMessage;
 import ru.traffic.messages.talk.ChangeMoveMessage;
 import ru.traffic.model.Move;
 import ru.traffic.model.Position;
@@ -16,6 +18,8 @@ import ru.traffic.processing.InfoProcessor;
 import ru.traffic.util.PositionUtil;
 import ru.traffic.util.RoadArray;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 /**
  * Created by Константин on 30.06.2015.
@@ -32,6 +36,8 @@ public class CarActor extends UntypedActor {
 
     private Position futurePosition;
 
+    private boolean alreadySkip;
+
     private Stack<Move> moveStack;
 
     public CarActor(ActorRef decisionActor, Car car, Position position) {
@@ -40,6 +46,7 @@ public class CarActor extends UntypedActor {
         this.position = position;
         this.futurePosition = position;
         moveStack = new Stack<>();
+        alreadySkip = false;
     }
 
     @Override
@@ -48,7 +55,11 @@ public class CarActor extends UntypedActor {
             nextTime((NextTimeMessage)o);
         } else  if (o instanceof ChangeMoveMessage) {
             handleChangeMoveMessage((ChangeMoveMessage)o);
-        } else{
+        } else if (o instanceof AskSkipMessage) {
+            handleAskSkipMessage((AskSkipMessage)o);
+        } else if (o instanceof AnsSkipMessage) {
+            handleAnsSkipMessage((AnsSkipMessage)o);
+        } else {
             unhandled(o);
         }
     }
@@ -103,6 +114,7 @@ public class CarActor extends UntypedActor {
 
 
     private void nextTime(NextTimeMessage nextTimeMessage) {
+        alreadySkip = false;
         position = futurePosition;
         futurePosition = null;
         log.info("start thinking...");
@@ -114,6 +126,7 @@ public class CarActor extends UntypedActor {
     private void doMove() {
         Move move = moveStack.pop();
         futurePosition = move.getTo();
+        log.info("doMove " + move);
         decisionActor.tell(new MoveMessage(move), getSelf());
     }
 
@@ -149,7 +162,77 @@ public class CarActor extends UntypedActor {
     }
 
     private void handleChangeMoveMessage(ChangeMoveMessage changeMoveMessage) {
-        if (changeMoveMessage.isNecessarily()) {
+        if (!car.willAsk()) {
+            doMove();
+        } else {
+            Move wishMove = new Move(position, futurePosition);
+            AskSkipMessage askSkipMessage = new AskSkipMessage(wishMove);
+            log.info("Ask skip");
+            changeMoveMessage.getCompetitor().tell(askSkipMessage, getSelf());
+        }
+    }
+
+    private void handleAskSkipMessage(AskSkipMessage askSkipMessage) {
+        log.info("is asked for skip");
+        if (!car.askSkip() || alreadySkip) {
+            log.info("Answer: No");
+            getSender().tell(new AnsSkipMessage(false), getSelf());
+        } else {
+            final Move competitorMove = askSkipMessage.getWishMove();
+            Move myMove = moveStack.pop();
+            while (conflict(myMove, competitorMove)) {
+                if (!moveStack.empty()) {
+                    myMove = moveStack.pop();
+                } else {
+                    log.info("Answer: No");
+                    getSender().tell(new AnsSkipMessage(false), getSelf());
+                    return;
+                }
+            }
+            log.info("Answer: yes");
+            log.info("doMove " + myMove);
+            decisionActor.tell(new MoveMessage(myMove), getSelf());
+            getSender().tell(new AnsSkipMessage(true), getSelf());
+        }
+    }
+
+    private boolean conflict(Move move1, Move move2) {
+        Set<Position> positions = new HashSet<>();
+        fillMove(positions, move1);
+        return lookMove(positions, move2);
+    }
+
+    private void fillMove(Set<Position> positions, Move move) {
+        Position from = move.getFrom();
+        Position to = move.getTo();
+        positions.add(from);
+        for (int i=0; i<=to.getDistance(); i++) {
+            positions.add(new Position(from.getDistance() + i, to.getLane()));
+        }
+    }
+
+    private boolean lookMove(Set<Position> positions, Move move) {
+        Position from = move.getFrom();
+        Position to = move.getTo();
+        if (positions.contains(from)) {
+            return true;
+        }
+        for (int i=0; i<=to.getDistance(); i++) {
+            if (positions.contains(new Position(from.getDistance() + i, to.getLane()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    private void handleAnsSkipMessage(AnsSkipMessage ansSkipMessage) {
+        boolean willSkip = ansSkipMessage.isWillSkip();
+        if (willSkip) {
+            Move move = new Move(position, futurePosition);
+            log.info("doMove " + move);
+            decisionActor.tell(new MoveMessage(move), getSelf());
+        } else {
             doMove();
         }
     }

@@ -31,7 +31,7 @@
                 var y = event.pageY - elemTop;
                 var distance = Math.round((x+5)/10);
                 var lane = Math.round((y+5)/10);
-                sendAddRoadPoint(distance, lane, 0, 0);
+                sendAddRoadPoint(distance, lane, 0, 0, 0);
             }, false);
         }
 
@@ -94,8 +94,9 @@
                     var probability = document.getElementById('probabilityField').value;
                     if (Math.random() < probability/100 && laneActive) {
                         var politeness = document.getElementById('politenessField').value;
+                        var effrontery = document.getElementById('effronteryField').value;
                         var wishSpeed = getRadioValue(document.getElementsByName('wishSpeedRadio'));
-                        sendAddRoadPoint(1, i, wishSpeed, politeness/100);
+                        sendAddRoadPoint(1, i, wishSpeed, politeness/100, effrontery/100);
                     }
                 }
             }
@@ -110,9 +111,9 @@
             return null;
         }
 
-        function sendAddRoadPoint(distance, lane, wishSpeed, politeness) {
+        function sendAddRoadPoint(distance, lane, wishSpeed, politeness, effrontery) {
             stompClient.send("/app/createpoint", {}, JSON.stringify({ 'distance': distance,
-                'lane': lane, 'wishSpeed': wishSpeed, 'politeness': politeness}));
+                'lane': lane, 'wishSpeed': wishSpeed, 'politeness': politeness, 'effrontery': effrontery}));
         }
 
         function showRoad(points, lanes, len) {
@@ -173,6 +174,8 @@
             <input type="radio" name="wishSpeedRadio" value="3"/> 3 <br/>
             <br/>
             Politeness: <input type="text" id="politenessField"/> <br/>
+            <br/>
+            Effrontery: <input type="text" id="effronteryField"/> <br/>
             <br/>
             Probability <input type="text" id="probabilityField"/> <br/>
             <br/>

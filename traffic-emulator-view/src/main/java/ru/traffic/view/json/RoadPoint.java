@@ -8,6 +8,7 @@ public class RoadPoint {
     private int lane;
     private int wishSpeed;
     private double politeness;
+    private double effrontery;
 
     public int getDistance() {
         return distance;
@@ -41,6 +42,14 @@ public class RoadPoint {
         this.politeness = politeness;
     }
 
+    public double getEffrontery() {
+        return effrontery;
+    }
+
+    public void setEffrontery(double effrontery) {
+        this.effrontery = effrontery;
+    }
+
     @Override
     public String toString() {
         return "RoadPoint{" +
@@ -48,6 +57,7 @@ public class RoadPoint {
                 ", lane=" + lane +
                 ", wishSpeed=" + wishSpeed +
                 ", politeness=" + politeness +
+                ", effrontery=" + effrontery +
                 '}';
     }
 }

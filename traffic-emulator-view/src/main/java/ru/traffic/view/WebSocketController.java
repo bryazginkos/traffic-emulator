@@ -58,7 +58,7 @@ public class WebSocketController {
     public void createPoint(RoadPoint roadPoint) {
         log.info("createPoint(" + roadPoint + ")");
         Position position = new Position(roadPoint.getDistance(), roadPoint.getLane());
-        Car car = new CarImpl(roadPoint.getPoliteness(), roadPoint.getWishSpeed());
+        Car car = new CarImpl(roadPoint.getPoliteness(), roadPoint.getEffrontery(), roadPoint.getWishSpeed());
         AddRoadPointClientMessage addRoadPointMessage = new AddRoadPointClientMessage(position, car);
         manager.tell(addRoadPointMessage, ActorRef.noSender());
     }

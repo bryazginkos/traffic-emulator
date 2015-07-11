@@ -7,17 +7,10 @@ import akka.actor.ActorRef;
  */
 public class ChangeMoveMessage {
 
-    private final boolean necessarily;
-
     private final ActorRef competitor;
 
-    public ChangeMoveMessage(boolean necessarily, ActorRef competitor) {
-        this.necessarily = necessarily;
+    public ChangeMoveMessage(ActorRef competitor) {
         this.competitor = competitor;
-    }
-
-    public boolean isNecessarily() {
-        return necessarily;
     }
 
     public ActorRef getCompetitor() {

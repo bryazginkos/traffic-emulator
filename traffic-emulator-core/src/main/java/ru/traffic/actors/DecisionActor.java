@@ -84,11 +84,11 @@ public class DecisionActor extends UntypedActor {
             if (moveMessage.getMove().getFrom().getLane() == moveMessage.getMove().getTo().getLane()) {
                 waitingMoves++;
                 log.info("rewrite move");
-                competitor.tell(new ChangeMoveMessage(true, getSender()), getSelf());
+                competitor.tell(new ChangeMoveMessage(getSender()), getSelf());
 
             } else {
                 log.info("move is impossible");
-                getSender().tell(new ChangeMoveMessage(true, competitor), getSelf());
+                getSender().tell(new ChangeMoveMessage(competitor), getSelf());
                 return;
             }
         }
