@@ -51,7 +51,7 @@ public class RoadTransformer {
         long red = Math.round(c.getRed());
         long green = Math.round(c.getGreen());
         long blue = Math.round(c.getBlue());
-        return "#" + toHexString(red) + toHexString(green) + toHexString(blue);
+        return toHexString(red) + toHexString(green) + toHexString(blue);
     }
 
     private String toHexString(long arg) {

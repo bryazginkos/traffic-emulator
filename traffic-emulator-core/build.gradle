@@ -21,5 +21,6 @@ tasks.withType(ScalaCompile) {
 dependencies {
     compile group: 'com.typesafe.akka', name: 'akka-actor_2.11', version: '2.4-M2'
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.7'
+    compile 'com.google.guava:guava:18.0'
     testCompile 'junit:junit:4.12'
 }

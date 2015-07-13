@@ -17,10 +17,11 @@ import ru.traffic.model.RoadPointInfo;
 import ru.traffic.processing.InfoProcessor;
 import ru.traffic.util.PositionUtil;
 import ru.traffic.util.RoadArray;
+import ru.traffic.util.RestorableStack;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
+
 /**
  * Created by Константин on 30.06.2015.
  */
@@ -38,14 +39,14 @@ public class CarActor extends UntypedActor {
 
     private boolean alreadySkip;
 
-    private Stack<Move> moveStack;
+    private RestorableStack<Move> moveStack;
 
     public CarActor(ActorRef decisionActor, Car car, Position position) {
         this.decisionActor = decisionActor;
         this.car = car;
         this.position = position;
         this.futurePosition = position;
-        moveStack = new Stack<>();
+        moveStack = new RestorableStack<>();
         alreadySkip = false;
     }
 
@@ -120,10 +121,10 @@ public class CarActor extends UntypedActor {
         log.info("start thinking...");
         RoadArray<RoadPointInfo> state = nextTimeMessage.getState();
         fillMoveStack(state);
-        doMove();
+        doMoveFromStack();
     }
 
-    private void doMove() {
+    private void doMoveFromStack() {
         Move move = moveStack.pop();
         futurePosition = move.getTo();
         log.info("doMove " + move);
@@ -163,7 +164,7 @@ public class CarActor extends UntypedActor {
 
     private void handleChangeMoveMessage(ChangeMoveMessage changeMoveMessage) {
         if (!car.willAsk()) {
-            doMove();
+            doMoveFromStack();
         } else {
             Move wishMove = new Move(position, futurePosition);
             AskSkipMessage askSkipMessage = new AskSkipMessage(wishMove);
@@ -173,9 +174,13 @@ public class CarActor extends UntypedActor {
     }
 
     private void handleAskSkipMessage(AskSkipMessage askSkipMessage) {
+        moveStack.save();
         log.info("is asked for skip");
         if (!car.askSkip() || alreadySkip) {
-            log.info("Answer: No");
+            log.info("Answer: No (already skipping)");
+            getSender().tell(new AnsSkipMessage(false), getSelf());
+        } else if (moveStack.isEmpty()) {
+            log.info("Answer: No (no move)");
             getSender().tell(new AnsSkipMessage(false), getSelf());
         } else {
             final Move competitorMove = askSkipMessage.getWishMove();
@@ -184,13 +189,15 @@ public class CarActor extends UntypedActor {
                 if (!moveStack.empty()) {
                     myMove = moveStack.pop();
                 } else {
-                    log.info("Answer: No");
+                    log.info("Answer: No (no move)");
+                    moveStack.restore();
                     getSender().tell(new AnsSkipMessage(false), getSelf());
                     return;
                 }
             }
             log.info("Answer: yes");
             log.info("doMove " + myMove);
+            futurePosition = myMove.getTo();
             decisionActor.tell(new MoveMessage(myMove), getSelf());
             getSender().tell(new AnsSkipMessage(true), getSelf());
         }
@@ -233,7 +240,7 @@ public class CarActor extends UntypedActor {
             log.info("doMove " + move);
             decisionActor.tell(new MoveMessage(move), getSelf());
         } else {
-            doMove();
+            doMoveFromStack();
         }
     }
 }

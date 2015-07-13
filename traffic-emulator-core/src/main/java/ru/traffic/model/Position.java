@@ -1,5 +1,7 @@
 package ru.traffic.model;
 
+import com.google.common.base.Objects;
+
 /**
  * Created by Константин on 30.06.2015.
  */
@@ -20,24 +22,18 @@ public class Position {
         return lane;
     }
 
-    //todo normal equals and hashcode
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (!(o instanceof Position)) return false;
         Position position = (Position) o;
-
-        if (distance != position.distance) return false;
-        return lane == position.lane;
-
+        return Objects.equal(distance, position.distance) &&
+                Objects.equal(lane, position.lane);
     }
 
     @Override
     public int hashCode() {
-        int result = distance;
-        result = 31 * result + lane;
-        return result;
+        return Objects.hashCode(distance, lane);
     }
 
     @Override

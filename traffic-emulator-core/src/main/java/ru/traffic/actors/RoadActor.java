@@ -64,7 +64,7 @@ public class RoadActor extends UntypedActor {
 
     private void doMoves(MovesMessage movesMessage) throws AccidentException, InterruptedException {
         //todo check initilization
-        Thread.sleep(1000);
+        Thread.sleep(500);
         log.info("processing moves...");
         MoveProcessor.processing(roadArray, movesMessage.getMoves());
         log.info("processing moves has been succesfully finished");
