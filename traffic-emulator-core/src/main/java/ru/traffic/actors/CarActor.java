@@ -126,9 +126,8 @@ public class CarActor extends UntypedActor {
 
     private void doMoveFromStack() {
         Move move = moveStack.pop();
-        futurePosition = move.getTo();
         log.info("doMove " + move);
-        decisionActor.tell(new MoveMessage(move), getSelf());
+        go(move);
     }
 
     private int chooseWishLane(RoadArray<RoadPointInfo> state) {
@@ -197,10 +196,14 @@ public class CarActor extends UntypedActor {
             }
             log.info("Answer: yes");
             log.info("doMove " + myMove);
-            futurePosition = myMove.getTo();
-            decisionActor.tell(new MoveMessage(myMove), getSelf());
+            go(myMove);
             getSender().tell(new AnsSkipMessage(true), getSelf());
         }
+    }
+
+    private void go(Move move) {
+        futurePosition = move.getTo();
+        decisionActor.tell(new MoveMessage(move), getSelf());
     }
 
     private boolean conflict(Move move1, Move move2) {
@@ -238,7 +241,7 @@ public class CarActor extends UntypedActor {
         if (willSkip) {
             Move move = new Move(position, futurePosition);
             log.info("doMove " + move);
-            decisionActor.tell(new MoveMessage(move), getSelf());
+            go(move);
         } else {
             doMoveFromStack();
         }
