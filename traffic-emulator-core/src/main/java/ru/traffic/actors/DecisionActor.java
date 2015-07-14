@@ -19,7 +19,7 @@ import ru.traffic.util.RoadArray;
 import java.util.*;
 
 /**
- * Created by Константин on 30.06.2015.
+ * Created by пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ on 30.06.2015.
  */
 public class DecisionActor extends UntypedActor {
 
@@ -84,6 +84,7 @@ public class DecisionActor extends UntypedActor {
             if (moveMessage.getMove().getFrom().getLane() == moveMessage.getMove().getTo().getLane()) {
                 waitingMoves++;
                 log.info("rewrite move");
+                //todo delete competitor's move
                 competitor.tell(new ChangeMoveMessage(getSender()), getSelf());
 
             } else {
@@ -93,6 +94,9 @@ public class DecisionActor extends UntypedActor {
             }
         }
         waitingMoves--;
+        if (waitingMoves < 0) {
+            log.error("waiting moves is negative");
+        }
         movesMap.put(getSender(), moveMessage.getMove());
         log.info("waiting for " + waitingMoves + "moves to process moves");
         if (waitingMoves == 0) {
@@ -118,6 +122,7 @@ public class DecisionActor extends UntypedActor {
         switch (phase) {
             case COLLECTING_MOVES:
             case WAITING_INITILIZATION:{
+                //todo possible more than one competitor
                 boolean allow = tryAddToPointsMap(distance, lane, roadPointInfo.getActorRef());
                 if (allow) {
                     roadActor.tell(addRoadPointMessage, getSelf());
@@ -145,6 +150,9 @@ public class DecisionActor extends UntypedActor {
         roadActor.tell(deleteRoadPointMessage, getSender());
         movesMap.remove(getSender());
         waitingMoves--;
+        if (waitingMoves < 0) {
+            log.error("waiting moves is negative");
+        }
         log.info("waiting for " + waitingMoves + "moves to process moves");
         if (waitingMoves == 0) {
             sendMoves();
@@ -187,7 +195,7 @@ public class DecisionActor extends UntypedActor {
             pointsMap.put(distanceFrom + i, laneTo, actorRef);
         }
         if (laneFrom != laneTo) {
-            pointsMap.put(distanceFrom, laneTo, actorRef);
+            pointsMap.put(distanceFrom, laneFrom, actorRef);
         }
         return null;
     }
