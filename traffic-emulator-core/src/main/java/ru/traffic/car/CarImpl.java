@@ -1,5 +1,7 @@
 package ru.traffic.car;
 
+import com.google.common.base.Objects;
+
 /**
  * Created by Константин on 01.07.2015.
  */
@@ -47,5 +49,20 @@ public class CarImpl implements Car {
                 ", wishSpeed=" + wishSpeed +
                 ", effrontery=" + effrontery +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CarImpl)) return false;
+        CarImpl car = (CarImpl) o;
+        return Objects.equal(politeness, car.politeness) &&
+                Objects.equal(effrontery, car.effrontery) &&
+                Objects.equal(wishSpeed, car.wishSpeed);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(politeness, effrontery, wishSpeed);
     }
 }

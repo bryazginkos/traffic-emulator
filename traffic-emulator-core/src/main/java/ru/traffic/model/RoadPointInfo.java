@@ -1,6 +1,7 @@
 package ru.traffic.model;
 
 import akka.actor.ActorRef;
+import com.google.common.base.Objects;
 import ru.traffic.car.Car;
 
 /**
@@ -33,23 +34,18 @@ public class RoadPointInfo {
         return car;
     }
 
-    //todo normal methods
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (!(o instanceof RoadPointInfo)) return false;
         RoadPointInfo that = (RoadPointInfo) o;
-
-        if (speed != that.speed) return false;
-        return !(actorRef != null ? !actorRef.equals(that.actorRef) : that.actorRef != null);
-
+        return Objects.equal(speed, that.speed) &&
+                Objects.equal(actorRef, that.actorRef) &&
+                Objects.equal(car, that.car);
     }
 
     @Override
     public int hashCode() {
-        int result = speed;
-        result = 31 * result + (actorRef != null ? actorRef.hashCode() : 0);
-        return result;
+        return Objects.hashCode(speed, actorRef, car);
     }
 }

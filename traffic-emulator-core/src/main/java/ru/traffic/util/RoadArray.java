@@ -1,5 +1,7 @@
 package ru.traffic.util;
 
+import com.google.common.base.Objects;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -74,5 +76,21 @@ public class RoadArray<T> {
 
     public int getElementsNum() {
         return elementsNum;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RoadArray)) return false;
+        RoadArray<?> roadArray = (RoadArray<?>) o;
+        return Objects.equal(length, roadArray.length) &&
+                Objects.equal(lanesNumber, roadArray.lanesNumber) &&
+                Objects.equal(elementsNum, roadArray.elementsNum) &&
+                Objects.equal(array, roadArray.array);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(length, lanesNumber, elementsNum, array);
     }
 }
