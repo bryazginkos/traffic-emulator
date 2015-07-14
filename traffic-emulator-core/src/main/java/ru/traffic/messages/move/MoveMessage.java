@@ -1,7 +1,6 @@
 package ru.traffic.messages.move;
 
 import ru.traffic.model.Move;
-import ru.traffic.model.Position;
 
 /**
  * Created by Константин on 30.06.2015.
