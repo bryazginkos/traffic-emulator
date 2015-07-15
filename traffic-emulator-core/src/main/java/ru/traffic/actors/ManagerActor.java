@@ -27,7 +27,6 @@ public class ManagerActor extends UntypedActor {
     private ActorRef decisionActor;
     private ActorRef roadActor;
     private ActorRef viewActor;
-    private HashSet<ActorRef> roadPointActors;
 
     public ManagerActor(Consumer<RoadArray> consumer) {
         viewActor = getContext().actorOf(Props.create(ViewActor.class, consumer), "view");
@@ -50,7 +49,6 @@ public class ManagerActor extends UntypedActor {
         log.info("Create actors for new road: lanes=" + initMessage.getLanes() + " length=" + initMessage.getLength());
         roadActor = getContext().actorOf(Props.create(RoadActor.class, viewActor), "road");
         decisionActor = getContext().actorOf(Props.create(DecisionActor.class, roadActor, getSelf(), initMessage.getLanes(), initMessage.getLength()), "decision");
-        roadPointActors = new HashSet<>();
         roadActor.tell(initMessage, getSelf());
     }
 
@@ -62,12 +60,10 @@ public class ManagerActor extends UntypedActor {
         ActorRef roadPoint = getContext().actorOf(Props.create(CarActor.class, decisionActor, car, position));
         RoadPointInfo roadPointInfo = new RoadPointInfo(car, roadPoint);
         AddRoadPointMessage addRoadPointMessage = new AddRoadPointMessage(position.getDistance(), position.getLane(), roadPointInfo);
-        roadPointActors.add(roadPoint);
         decisionActor.tell(addRoadPointMessage, roadPoint);
     }
 
     private void errorAddRoadPoint(ErrorAddRoadPointMessage errorAddRoadPointMessage) {
         log.info("remove error actor from set");
-        roadPointActors.remove(errorAddRoadPointMessage.getActorRef());
     }
 }
