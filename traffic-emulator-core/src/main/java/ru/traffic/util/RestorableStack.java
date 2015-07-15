@@ -9,6 +9,8 @@ public class RestorableStack<T> extends Stack<T> {
 
     private Stack<T> saved;
 
+    private T first;
+
     public void save() {
         saved = new Stack<>();
         saved.addAll(this);
@@ -19,4 +21,19 @@ public class RestorableStack<T> extends Stack<T> {
         addAll(saved);
     }
 
+    @Override
+    public synchronized T pop() {
+        if (isEmpty()) {
+            return first;
+        }
+        return super.pop();
+    }
+
+    @Override
+    public T push(T item) {
+        if (isEmpty()) {
+            first = item;
+        }
+        return super.push(item);
+    }
 }
