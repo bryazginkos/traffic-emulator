@@ -14,6 +14,7 @@ import ru.traffic.messages.talk.ChangeMoveMessage;
 import ru.traffic.model.Move;
 import ru.traffic.model.Position;
 import ru.traffic.model.RoadPointInfo;
+import ru.traffic.util.MarkableRoadArray;
 import ru.traffic.util.RoadArray;
 
 import java.util.*;
@@ -35,7 +36,7 @@ public class DecisionActor extends UntypedActor {
 
     private Map<ActorRef, Move> movesMap;
 
-    private RoadArray<ActorRef> pointsMap;
+    private MarkableRoadArray<ActorRef> pointsMap;
 
     private List<AddRoadPointMessage> buffer;
 
@@ -47,7 +48,7 @@ public class DecisionActor extends UntypedActor {
         movesMap = new HashMap<>();
         buffer = new ArrayList<>();
         phase = Phase.WAITING_INITILIZATION;
-        pointsMap = new RoadArray<>(length, lanes, ActorRef.class);
+        pointsMap = new MarkableRoadArray<>(length, lanes, ActorRef.class);
     }
 
     @Override
@@ -77,25 +78,34 @@ public class DecisionActor extends UntypedActor {
         phase = Phase.COLLECTING_MOVES;
     }
 
-    private void takeMove(MoveMessage moveMessage) {
+    private void takeMove(MoveMessage moveMessage) throws Exception {
+        if (waitingMoves == 0) {
+            throw new Exception(getSender().toString());
+        }
         log.info("take move decision move=" + moveMessage.getMove());
-        List<ActorRef> competitors = tryRegisterMove(moveMessage.getMove(), getSender());
+        Set<ActorRef> competitors = tryRegisterMove(moveMessage.getMove(), getSender());
         if (competitors != null) {
             assert !competitors.isEmpty();
             if (moveMessage.getMove().getFrom().getLane() == moveMessage.getMove().getTo().getLane()) {
                 waitingMoves = waitingMoves + competitors.size();
                 log.info("rewrite move");
                 competitors.stream().forEach(this::removeMoveIfExist);
+                competitors.stream().forEach(movesMap::remove);
                 competitors.stream().forEach(competitor -> competitor.tell(new ChangeMoveMessage(getSender()), getSelf()));
             } else {
                 log.info("move is impossible");
-                getSender().tell(new ChangeMoveMessage(competitors.get(0)), getSelf());
+                if (movesMap.containsKey(getSender())) {
+                    waitingMoves++;
+                    movesMap.remove(getSender());
+                }
+                getSender().tell(new ChangeMoveMessage(competitors.stream().findFirst().get()), getSelf());
                 return;
             }
         }
-        waitingMoves--;
-        if (waitingMoves < 0) {
-            log.error("waiting moves is negative");
+        if (!movesMap.containsKey(getSender())) {
+            waitingMoves--;
+        } else {
+            log.info("change move decision");
         }
         movesMap.put(getSender(), moveMessage.getMove());
         log.info("waiting for " + waitingMoves + "moves to process moves");
@@ -168,9 +178,10 @@ public class DecisionActor extends UntypedActor {
                 }
             }
         }
+        pointsMap.markAll();
     }
 
-    private List<ActorRef> tryRegisterMove(Move move, ActorRef actorRef) {
+    private Set<ActorRef> tryRegisterMove(Move move, ActorRef actorRef) {
         removeMoveIfExist(actorRef, move.getFrom());
         int distanceTo = move.getTo().getDistance();
         int distanceFrom = move.getFrom().getDistance();
@@ -181,7 +192,7 @@ public class DecisionActor extends UntypedActor {
 
         assert pointsMap.get(distanceFrom, laneFrom) == actorRef;
 
-        List<ActorRef> competitors = new ArrayList<>();
+        Set<ActorRef> competitors = new HashSet<>();
 
         for (int i = 1; i <= deltaDistance; i++) {
             ActorRef competitorNeighbour = pointsMap.get(distanceFrom + i, laneTo);
@@ -221,9 +232,11 @@ public class DecisionActor extends UntypedActor {
 
     private void removeMoveIfExist(ActorRef actorRef) {
         //todo possible optimize if look from one point
-        for (int distance = 0; distance <= pointsMap.getLength(); distance++) {
-            for (int lane = 0; lane <= pointsMap.getLanesNumber(); lane++) {
-                pointsMap.putWithCondition(distance, lane, null, oldAct -> oldAct == actorRef);
+        for (int distance = 1; distance <= pointsMap.getLength(); distance++) {
+            for (int lane = 1; lane <= pointsMap.getLanesNumber(); lane++) {
+                if (!pointsMap.isMarked(distance, lane)) {
+                    pointsMap.putWithCondition(distance, lane, null, oldAct -> oldAct == actorRef);
+                }
             }
         }
     }
